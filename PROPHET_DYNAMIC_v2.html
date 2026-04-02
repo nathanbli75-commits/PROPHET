@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PROPHET — Intelligence Financière Panafricaine</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#07090c;--bg2:#0d1117;--bg3:#141b24;--bg4:#1a2333;--bg5:#212d40;
+  --b:rgba(255,255,255,.055);--b2:rgba(255,255,255,.10);
+  --t:#cdd6e8;--t2:#7a8699;--t3:#3d4d61;
+  --gold:#c9963a;--gold2:#a87a28;--gd:rgba(201,150,58,.12);
+  --gr:#22d97a;--grd:rgba(34,217,122,.10);
+  --re:#f04f4f;--red:rgba(240,79,79,.10);
+  --bl:#3d8ef8;--bld:rgba(61,142,248,.10);
+  --te:#1ec8b0;--ted:rgba(30,200,176,.10);
+  --pu:#8b6cf7;--pud:rgba(139,108,247,.10);
+  --or:#f5923c;--ord:rgba(245,146,60,.10);
+  --ci:#f5923c;--ao:#22d97a;--af:#3d8ef8;--wl:#c9963a;
+  --font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r:8px;--rl:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--t);}
+
+/* LAYOUT */
+#shell{display:flex;height:100vh;}
+#sidebar{width:54px;background:var(--bg2);border-right:1px solid var(--b);display:flex;flex-direction:column;align-items:center;padding:12px 0 12px;gap:3px;flex-shrink:0;transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+#sidebar.open{width:200px;}
+#content{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* SIDEBAR */
+.sb-logo{width:34px;height:34px;border-radius:9px;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:10px;cursor:pointer;}
+.sb-logo svg{width:18px;height:18px;}
+.sb-item{width:38px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:flex-start;padding:0 11px;cursor:pointer;color:var(--t2);transition:all .15s;gap:0;white-space:nowrap;flex-shrink:0;}
+.sb-item:hover{background:var(--bg4);color:var(--t);}
+.sb-item.on{background:var(--gd);color:var(--gold);}
+.sb-item svg{width:15px;height:15px;flex-shrink:0;}
+.sb-txt{font-size:12px;opacity:0;width:0;overflow:hidden;transition:opacity .2s,width .2s;margin-left:0;}
+#sidebar.open .sb-item{width:176px;}
+#sidebar.open .sb-txt{opacity:1;width:auto;margin-left:10px;}
+.sb-sep{width:28px;height:1px;background:var(--b);margin:5px 0;transition:width .2s;}
+#sidebar.open .sb-sep{width:176px;}
+.sb-mode{margin-top:auto;width:38px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--gd);color:var(--gold);font-size:10px;font-weight:600;cursor:pointer;border:1px solid rgba(201,150,58,.22);transition:width .2s;}
+#sidebar.open .sb-mode{width:176px;justify-content:flex-start;padding:0 11px;gap:8px;}
+.sb-mode-txt{font-size:11px;opacity:0;width:0;overflow:hidden;transition:opacity .2s;}
+#sidebar.open .sb-mode-txt{opacity:1;width:auto;}
+
+/* TOPBAR */
+#topbar{height:50px;background:var(--bg2);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
+#menu-btn{width:28px;height:28px;border-radius:6px;background:none;border:none;cursor:pointer;color:var(--t2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#menu-btn:hover{background:var(--bg4);color:var(--t);}
+#page-ttl{font-size:13px;font-weight:500;color:var(--t);white-space:nowrap;flex-shrink:0;}
+.ticker-wrap{flex:1;overflow:hidden;position:relative;margin:0 10px;}
+.ticker-inner{display:flex;gap:8px;animation:ticker 30s linear infinite;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick{display:flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--b2);background:var(--bg3);white-space:nowrap;cursor:pointer;font-family:var(--mono);}
+.tick:hover{border-color:var(--b2);background:var(--bg4);}
+.tick .d{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.t-ci .d{background:var(--ci);} .t-ci{color:var(--ci);}
+.t-ao .d{background:var(--ao);} .t-ao{color:var(--ao);}
+.t-af .d{background:var(--af);} .t-af{color:var(--af);}
+.t-wl .d{background:var(--wl);} .t-wl{color:var(--wl);}
+.t-neu{color:var(--t2);}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.agent-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);background:var(--bg3);padding:4px 10px;border-radius:20px;border:1px solid var(--b);}
+.a-dot{width:6px;height:6px;border-radius:50%;background:var(--gr);animation:ap 2s infinite;}
+@keyframes ap{0%,100%{opacity:1}50%{opacity:.3}}
+.mode-btn{font-size:10px;padding:3px 10px;border-radius:20px;cursor:pointer;font-weight:500;border:1px solid rgba(139,108,247,.3);background:var(--pud);color:var(--pu);}
+.mode-btn.part{border-color:rgba(34,217,122,.3);background:var(--grd);color:var(--gr);}
+
+/* VIEWS */
+#main{flex:1;overflow:hidden;display:flex;}
+.view{display:none;flex:1;overflow-y:auto;padding:16px 18px 32px;}
+.view.on{display:block;}
+#chat-v{display:none;flex-direction:column;flex:1;}
+#chat-v.on{display:flex;}
+
+/* PANELS */
+.pnl{background:var(--bg2);border:1px solid var(--b);border-radius:var(--rl);padding:14px 16px;position:relative;}
+.ph{font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;}
+.ph-sub{font-size:10px;color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:10px;}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px;}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px;}
+.g5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:10px;}
+.cw{position:relative;width:100%;}
+
+/* MARKET CARDS */
+.mkt-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:12px;}
+.mkt-c{border-radius:var(--rl);padding:12px 14px;border:1px solid var(--b);background:var(--bg2);cursor:pointer;transition:border-color .2s,transform .15s;}
+.mkt-c:hover{transform:translateY(-1px);}
+.mkt-c.sel{border-width:1.5px;}
+.mkt-c.ci{border-top:2px solid var(--ci);} .mkt-c.ci.sel{border-color:var(--ci);}
+.mkt-c.ao{border-top:2px solid var(--ao);} .mkt-c.ao.sel{border-color:var(--ao);}
+.mkt-c.af{border-top:2px solid var(--af);} .mkt-c.af.sel{border-color:var(--af);}
+.mkt-c.wl{border-top:2px solid var(--wl);} .mkt-c.wl.sel{border-color:var(--wl);}
+.mkt-flag{font-size:16px;margin-bottom:4px;}
+.mkt-name{font-size:9px;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1px;}
+.mkt-val{font-size:19px;font-weight:500;font-family:var(--mono);}
+.mkt-delta{font-size:11px;font-weight:500;font-family:var(--mono);margin-top:3px;}
+.mkt-sub{font-size:9px;color:var(--t3);margin-top:2px;}
+.up{color:var(--gr);} .dn{color:var(--re);}
+
+/* KPI */
+.kpi{background:var(--bg3);border-radius:var(--r);padding:10px 12px;}
+.kpi-l{font-size:10px;color:var(--t2);margin-bottom:3px;}
+.kpi-v{font-size:16px;font-weight:500;font-family:var(--mono);}
+.kpi-v.up{color:var(--gr);} .kpi-v.dn{color:var(--re);} .kpi-v.gd{color:var(--gold);}
+
+/* BADGES */
+.bdg{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500;font-family:var(--mono);}
+.b-up{background:var(--grd);color:var(--gr);} .b-dn{background:var(--red);color:var(--re);}
+.b-n{background:var(--bg4);color:var(--t2);} .b-gd{background:var(--gd);color:var(--gold);}
+.b-or{background:var(--ord);color:var(--or);} .b-bl{background:var(--bld);color:var(--bl);}
+.b-pu{background:var(--pud);color:var(--pu);}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+th{font-size:10px;color:var(--t2);padding:0 7px 8px;text-align:left;border-bottom:1px solid var(--b);font-weight:500;letter-spacing:.04em;}
+th:last-child,td:last-child{text-align:right;}
+td{padding:8px 7px;color:var(--t);border-bottom:1px solid var(--b);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg3);transition:background .1s;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:7px 15px;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--font);font-weight:500;transition:opacity .15s,transform .1s;}
+.btn:hover{opacity:.87;} .btn:active{transform:scale(.98);}
+.btn-blue{background:var(--bl);color:#fff;}
+.btn-green{background:var(--gr);color:#07090c;}
+.btn-red{background:var(--re);color:#fff;}
+.btn-gold{background:var(--gold);color:#07090c;}
+.btn-ghost{background:var(--bg3);color:var(--t);border:1px solid var(--b2);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* STRESS */
+.sc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;}
+.sc-card{background:var(--bg2);border:1px solid var(--b);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:border-color .15s,background .15s;}
+.sc-card:hover{background:var(--bg3);}
+.sc-card.on{border-color:var(--bl);background:var(--bld);}
+.sc-nm{font-size:12px;font-weight:500;margin-bottom:3px;}
+.sc-ds{font-size:10px;color:var(--t2);line-height:1.5;}
+.sc-imp{font-size:15px;font-weight:500;font-family:var(--mono);margin-top:5px;}
+.sbar{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.sbar-l{font-size:11px;color:var(--t2);width:130px;flex-shrink:0;}
+.sbar-t{flex:1;height:9px;background:var(--bg4);border-radius:5px;overflow:hidden;}
+.sbar-f{height:100%;border-radius:5px;transition:width .7s cubic-bezier(.4,0,.2,1);}
+.sbar-v{font-size:11px;font-weight:500;font-family:var(--mono);width:52px;text-align:right;flex-shrink:0;}
+.ss-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px;}
+.ss-item{background:var(--bg3);border-radius:var(--r);padding:9px 11px;}
+.ss-l{font-size:10px;color:var(--t2);margin-bottom:2px;}
+.ss-v{font-size:14px;font-weight:500;font-family:var(--mono);}
+
+/* PREDICTIVE */
+.pred-c{background:var(--bg3);border:1px solid var(--b);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.pred-c:hover{border-color:var(--b2);}
+.pred-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.pred-sec{font-size:12px;font-weight:500;}
+.pred-cf{font-size:10px;font-family:var(--mono);}
+.pred-bar{height:4px;border-radius:2px;background:var(--bg4);margin-bottom:6px;overflow:hidden;}
+.pred-bf{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.pred-ds{font-size:11px;color:var(--t2);line-height:1.5;}
+.pred-tm{font-size:10px;margin-top:5px;}
+
+/* TRADING */
+.trade-form{background:var(--bg2);border:1px solid var(--b);border-radius:var(--rl);padding:14px;}
+.ttype-row{display:flex;gap:4px;margin-bottom:12px;}
+.ttype{font-size:12px;padding:6px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--b2);background:var(--bg3);color:var(--t2);font-family:var(--font);transition:all .15s;}
+.ttype.on-buy{background:var(--grd);color:var(--gr);border-color:rgba(34,217,122,.3);}
+.ttype.on-sell{background:var(--red);color:var(--re);border-color:rgba(240,79,79,.3);}
+.ttype.on-alert{background:var(--gd);color:var(--gold);border-color:rgba(201,150,58,.3);}
+.tf{margin-bottom:10px;}
+.tf label{font-size:10px;color:var(--t2);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.tf input,.tf select{width:100%;background:var(--bg3);border:1px solid var(--b2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--t);font-family:var(--font);outline:none;transition:border-color .15s;}
+.tf input:focus,.tf select:focus{border-color:var(--gold);}
+.ob-row{display:flex;justify-content:space-between;padding:4px 6px;font-size:11px;font-family:var(--mono);border-radius:4px;transition:background .1s;}
+.ob-row:hover{background:var(--bg4);}
+
+/* COMPLIANCE */
+.comp-i{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--b);}
+.comp-i:last-child{border-bottom:none;}
+.comp-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+.comp-ti{font-size:12px;font-weight:500;margin-bottom:2px;}
+.comp-ds{font-size:11px;color:var(--t2);line-height:1.5;}
+
+/* AGENTS */
+.ag-c{background:var(--bg2);border:1px solid var(--b);border-radius:var(--rl);padding:13px 15px;}
+.ag-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.ag-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.ag-nm{font-size:13px;font-weight:500;}
+.ag-sub{font-size:10px;color:var(--t2);}
+.ag-ds{font-size:11px;color:var(--t2);line-height:1.6;}
+.ag-ts{font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:6px;}
+.feed-i{display:flex;gap:8px;padding:10px 0;border-bottom:1px solid var(--b);}
+.feed-i:last-child{border-bottom:none;}
+.feed-av{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.feed-msg{font-size:11px;color:var(--t2);line-height:1.6;}
+.feed-msg strong{color:var(--t);}
+.feed-ts{font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:2px;}
+.feed-new{animation:fadein .5s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* CHART CONTROLS */
+.chart-ctrl{display:flex;gap:4px;}
+.cc-btn{font-size:10px;padding:3px 8px;border-radius:5px;cursor:pointer;border:1px solid var(--b2);background:var(--bg3);color:var(--t2);font-family:var(--mono);transition:all .15s;}
+.cc-btn.on{background:var(--gd);color:var(--gold);border-color:rgba(201,150,58,.3);}
+.cc-btn:hover{color:var(--t);}
+
+/* CHAT */
+#qa-bar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--b);overflow-x:auto;flex-shrink:0;background:var(--bg2);}
+.qa-btn{white-space:nowrap;font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--b2);background:var(--bg3);color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .15s;}
+.qa-btn:hover{color:var(--t);background:var(--bg4);}
+#messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;}
+.msg{display:flex;gap:8px;align-items:flex-start;max-width:84%;}
+.msg.u{align-self:flex-end;flex-direction:row-reverse;}
+.msg-av{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.av-b{background:var(--gold);color:#07090c;} .av-u{background:var(--bg4);color:var(--t2);}
+.msg-bbl{padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.65;color:var(--t);border:1px solid var(--b);background:var(--bg2);}
+.msg.u .msg-bbl{background:var(--bg3);}
+.msg-bbl p{margin-bottom:5px;} .msg-bbl p:last-child{margin-bottom:0;}
+.typing{display:flex;align-items:center;gap:4px;padding:9px 13px;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:bounce 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;} .dot:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+#inp-wrap{padding:10px 12px;border-top:1px solid var(--b);display:flex;gap:7px;align-items:flex-end;background:var(--bg2);flex-shrink:0;}
+#user-inp{flex:1;resize:none;border:1px solid var(--b2);border-radius:9px;padding:8px 12px;font-size:13px;font-family:var(--font);color:var(--t);background:var(--bg3);outline:none;line-height:1.4;min-height:36px;max-height:88px;}
+#user-inp:focus{border-color:var(--gold);}
+#user-inp::placeholder{color:var(--t3);}
+#send-btn{width:34px;height:34px;border-radius:9px;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
+#send-btn:hover{background:var(--gold2);}
+.nav-lnk{display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:11px;padding:5px 11px;border-radius:7px;border:1px solid var(--b2);background:var(--bg3);color:var(--t);cursor:pointer;font-family:var(--font);}
+.bubble-kpis{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.bkpi{background:var(--bg3);border:1px solid var(--b);border-radius:7px;padding:6px 10px;}
+.bkpi-l{font-size:9px;color:var(--t2);margin-bottom:2px;}
+.bkpi-v{font-size:13px;font-weight:500;font-family:var(--mono);}
+
+/* ALERTS */
+.alert-box{border-radius:8px;padding:8px 11px;margin-bottom:7px;border-left:2px solid;}
+.al-gr{background:var(--grd);border-color:var(--gr);}
+.al-re{background:var(--red);border-color:var(--re);}
+.al-gd{background:var(--gd);border-color:var(--gold);}
+.al-bl{background:var(--bld);border-color:var(--bl);}
+.al-t{font-size:10px;font-weight:600;margin-bottom:2px;}
+.al-d{font-size:11px;color:var(--t2);line-height:1.5;}
+
+/* TOOLTIPS */
+[data-tip]{position:relative;}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg4);color:var(--t);font-size:10px;padding:4px 8px;border-radius:5px;white-space:nowrap;border:1px solid var(--b2);z-index:100;pointer-events:none;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="shell">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-logo" onclick="toggleSidebar()">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M3 17L9 11L13 15L21 7" stroke="#07090c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 7H21V11" stroke="#07090c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="sb-item on" onclick="go('dash',this)"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/></svg><span class="sb-txt">Dashboard</span></div>
+  <div class="sb-item" onclick="go('stress',this)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="sb-txt">Stress Test</span></div>
+  <div class="sb-item" onclick="go('pred',this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sb-txt">Prédictif IA</span></div>
+  <div class="sb-item" onclick="go('trade',this)"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7h18M3 12h12M3 17h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="19" cy="17" r="3" stroke="currentColor" stroke-width="1.5"/></svg><span class="sb-txt">Trading</span></div>
+  <div class="sb-item" onclick="go('comp',this)"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 4v6c0 4.5-3 8.5-7 10C8 20.5 5 16.5 5 12V6l7-4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sb-txt">Conformité</span></div>
+  <div class="sb-sep"></div>
+  <div class="sb-item" onclick="go('agents',this)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><circle cx="5" cy="18" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="18" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M12 12v4M12 16l-7 2M12 16l7 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sb-txt">Agents IA</span></div>
+  <div class="sb-item" onclick="go('chat',this)"><svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span class="sb-txt">Assistant IA</span></div>
+  <div class="sb-mode" onclick="toggleMode()"><span style="font-size:11px;font-weight:700;">PRO</span><span class="sb-mode-txt" id="sb-mode-txt">Professionnel</span></div>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+<div id="topbar">
+  <button id="menu-btn" onclick="toggleSidebar()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+  <span id="page-ttl">Dashboard — Marchés en direct</span>
+  <div class="ticker-wrap" id="ticker-wrap"></div>
+  <div class="tb-right">
+    <div class="agent-pill"><div class="a-dot"></div><span id="ag-lbl">5 agents actifs</span></div>
+    <div class="mode-btn" id="mode-btn" onclick="toggleMode()">PROFESSIONNEL</div>
+  </div>
+</div>
+
+<div id="main">
+
+<!-- ═══════ DASHBOARD ═══════ -->
+<div id="dash-v" class="view on">
+  <div class="mkt-row" id="mkt-row"></div>
+
+  <div class="g2">
+    <div class="pnl">
+      <div class="ph">Comparaison croissance — 4 marchés
+        <div class="chart-ctrl" id="dash-ctrl">
+          <button class="cc-btn on" onclick="setDashPeriod('1Y',this)">1A</button>
+          <button class="cc-btn" onclick="setDashPeriod('3Y',this)">3A</button>
+          <button class="cc-btn" onclick="setDashPeriod('5Y',this)">5A</button>
+        </div>
+      </div>
+      <div class="cw" style="height:220px;"><canvas id="compareChart"></canvas></div>
+    </div>
+    <div class="pnl">
+      <div class="ph">Flux investissements entrants <span class="ph-sub">$Mds</span></div>
+      <div class="cw" style="height:220px;"><canvas id="flowChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="pnl">
+      <div class="ph">Tableau macro — 4 marchés <span class="ph-sub">T1 2025</span></div>
+      <table>
+        <thead><tr><th>Indicateur</th><th>🇨🇮 CI</th><th>🌍 AO</th><th>🌐 AF</th><th>🗺️ Monde</th></tr></thead>
+        <tbody>
+          <tr><td>PIB %</td><td class="up" style="font-family:var(--mono)">+6.8%</td><td class="up" style="font-family:var(--mono)">+6.1%</td><td class="up" style="font-family:var(--mono)">+4.1%</td><td style="font-family:var(--mono);color:var(--wl)">+3.2%</td></tr>
+          <tr><td>Inflation</td><td style="font-family:var(--mono)">3.1%</td><td style="font-family:var(--mono)">3.8%</td><td style="font-family:var(--mono)">6.2%</td><td style="font-family:var(--mono)">3.5%</td></tr>
+          <tr><td>FDI entrants</td><td class="up" style="font-family:var(--mono)">+22%</td><td class="up" style="font-family:var(--mono)">+18%</td><td class="up" style="font-family:var(--mono)">+11%</td><td class="up" style="font-family:var(--mono)">+4%</td></tr>
+          <tr><td>Risque</td><td><span class="bdg b-or">Modéré</span></td><td><span class="bdg b-or">Modéré</span></td><td><span class="bdg b-dn">Élevé</span></td><td><span class="bdg b-n">Faible</span></td></tr>
+          <tr><td>Potentiel 5A</td><td><span class="bdg b-up">Très fort</span></td><td><span class="bdg b-up">Fort</span></td><td><span class="bdg b-gd">Fort</span></td><td><span class="bdg b-n">Stable</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pnl">
+      <div class="ph">Allocation recommandée <span class="ph-sub" id="alloc-lbl">Profil Pro</span></div>
+      <div class="cw" style="height:150px;"><canvas id="allocChart"></canvas></div>
+      <div id="alloc-leg" style="display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px;"></div>
+    </div>
+    <div class="pnl">
+      <div class="ph">Alertes agents IA <span class="ph-sub">Temps réel</span></div>
+      <div id="live-alerts"></div>
+    </div>
+  </div>
+
+  <div class="pnl">
+    <div class="ph">Signaux d'investissement — 4 marchés <span class="ph-sub">Mis à jour en direct</span></div>
+    <div class="cw" style="height:180px;"><canvas id="signalChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════ STRESS TEST ═══════ -->
+<div id="stress-v" class="view">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div><div style="font-size:14px;font-weight:500;">Tableau de bord Stress Test</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">Simulez l'impact de crises sur vos 4 marchés cibles</div></div>
+    <button class="btn btn-blue" id="run-btn" onclick="runStress()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><polygon points="5,3 19,12 5,21" fill="white"/></svg>Lancer</button>
+  </div>
+  <div class="sc-grid" id="sc-grid"></div>
+  <div class="g2">
+    <div class="pnl">
+      <div class="ph">Impact par actif — <span id="sc-lbl" style="color:var(--bl);">Crise 2008</span></div>
+      <div id="stress-bars"></div>
+      <div class="ss-grid" id="stress-sum"></div>
+    </div>
+    <div class="pnl">
+      <div class="ph">Impact sur les 4 marchés</div>
+      <div class="cw" style="height:180px;"><canvas id="stressMktChart"></canvas></div>
+      <div style="margin-top:10px;">
+        <div class="ph" style="margin-bottom:8px;">Recommandations IA</div>
+        <div id="stress-reco"></div>
+      </div>
+    </div>
+  </div>
+  <div class="pnl" style="margin-top:10px;">
+    <div class="ph">Évolution VaR sous stress <span class="ph-sub">Baseline vs scénario sélectionné</span></div>
+    <div class="cw" style="height:180px;"><canvas id="stressVarChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════ PRÉDICTIF ═══════ -->
+<div id="pred-v" class="view">
+  <div style="margin-bottom:12px;"><div style="font-size:14px;font-weight:500;">Analyses Prédictives — Moteur IA PROPHET</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">Modèles ML entraînés sur 10 ans de données macro africaines — Confiance recalculée quotidiennement</div></div>
+  <div class="g2">
+    <div class="pnl">
+      <div class="ph">Prévisions sectorielles 12 mois <span class="ph-sub">Cliquez pour détails</span></div>
+      <div id="pred-cards"></div>
+    </div>
+    <div>
+      <div class="pnl" style="margin-bottom:10px;">
+        <div class="ph">Projection ROI — 3 ans <span class="ph-sub">% rendement estimé</span></div>
+        <div class="cw" style="height:180px;"><canvas id="roiChart"></canvas></div>
+      </div>
+      <div class="pnl">
+        <div class="ph">Timing optimal par secteur</div>
+        <table>
+          <thead><tr><th>Secteur</th><th>Fenêtre</th><th>ROI att.</th></tr></thead>
+          <tbody>
+            <tr><td>Fintech CI</td><td><span class="bdg b-up">Avr–Jun 25</span></td><td class="up" style="font-family:var(--mono)">3–8x</td></tr>
+            <tr><td>Immo Abidjan</td><td><span class="bdg b-up">Mai–Jul 25</span></td><td class="up" style="font-family:var(--mono)">15–22%</td></tr>
+            <tr><td>SaaS PME</td><td><span class="bdg b-up">Maintenant</span></td><td class="up" style="font-family:var(--mono)">2–5x</td></tr>
+            <tr><td>Énergie solaire</td><td><span class="bdg b-or">T3 2025</span></td><td class="up" style="font-family:var(--mono)">18–25%</td></tr>
+            <tr><td>BRVM actions</td><td><span class="bdg b-n">Jan–Mar 26</span></td><td style="font-family:var(--mono)">8–12%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="ph">Projections PIB — 4 marchés 2025–2028
+      <div class="chart-ctrl">
+        <button class="cc-btn on" onclick="setPredType('pib',this)">PIB</button>
+        <button class="cc-btn" onclick="setPredType('fdi',this)">FDI</button>
+        <button class="cc-btn" onclick="setPredType('roi',this)">ROI sec.</button>
+      </div>
+    </div>
+    <div class="cw" style="height:180px;"><canvas id="macroChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════ TRADING ═══════ -->
+<div id="trade-v" class="view">
+  <div style="margin-bottom:12px;"><div style="font-size:14px;font-weight:500;">Outils de Trading &amp; Décision</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">Ordres simulés BRVM · Carnet d'ordres · Gestion de portefeuille</div></div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) minmax(0,1fr);gap:10px;margin-bottom:10px;">
+    <div class="trade-form">
+      <div class="ph">Passer un ordre</div>
+      <div class="ttype-row">
+        <button class="ttype on-buy" onclick="setTtype('buy',this)">ACHETER</button>
+        <button class="ttype" onclick="setTtype('sell',this)">VENDRE</button>
+        <button class="ttype" onclick="setTtype('alert',this)">ALERTE</button>
+      </div>
+      <div class="tf"><label>Marché</label>
+        <select id="t-mkt"><option>🇨🇮 BRVM — Côte d'Ivoire</option><option>🌍 BRVM — AO</option><option>📊 NYSE / NASDAQ</option><option>🏦 Obligations BCEAO</option></select>
+      </div>
+      <div class="tf"><label>Actif</label><input type="text" id="t-asset" placeholder="ex: SGBCI, ORANGE-CI…"/></div>
+      <div class="tf"><label>Quantité</label><input type="number" id="t-qty" placeholder="100" min="1"/></div>
+      <div class="tf"><label>Prix (FCFA)</label><input type="number" id="t-price" placeholder="12 500"/></div>
+      <button class="btn btn-green" id="t-btn" style="width:100%;" onclick="submitOrder()">ACHETER →</button>
+      <div id="t-confirm" style="display:none;margin-top:8px;font-size:11px;padding:7px 10px;border-radius:6px;text-align:center;"></div>
+    </div>
+    <div class="pnl">
+      <div class="ph">
+        <span id="chart-asset-lbl">SGBCI — Société Générale CI</span>
+        <div class="chart-ctrl">
+          <button class="cc-btn on" onclick="setPriceAsset('SGBCI',this)">SGBCI</button>
+          <button class="cc-btn" onclick="setPriceAsset('ORANGE-CI',this)">ORANGE</button>
+          <button class="cc-btn" onclick="setPriceAsset('CORIS',this)">CORIS</button>
+          <button class="cc-btn" onclick="setPriceAsset('WAVE',this)">WAVE</button>
+        </div>
+      </div>
+      <div class="cw" style="height:200px;"><canvas id="priceChart"></canvas></div>
+      <div class="g4" style="margin-top:10px;">
+        <div class="kpi"><div class="kpi-l">Ouverture</div><div class="kpi-v" id="p-open">12 400</div></div>
+        <div class="kpi"><div class="kpi-l">Haut</div><div class="kpi-v up" id="p-high">12 800</div></div>
+        <div class="kpi"><div class="kpi-l">Bas</div><div class="kpi-v dn" id="p-low">12 200</div></div>
+        <div class="kpi"><div class="kpi-l">Volume</div><div class="kpi-v" id="p-vol">48.2K</div></div>
+      </div>
+    </div>
+    <div class="pnl">
+      <div class="ph">Carnet d'ordres <span class="ph-sub">Simulation BRVM</span></div>
+      <div style="font-size:9px;color:var(--t2);display:flex;justify-content:space-between;padding:0 6px 6px;border-bottom:1px solid var(--b);margin-bottom:3px;"><span>QTÉ VENTE</span><span>PRIX</span><span>QTÉ ACHAT</span></div>
+      <div id="order-book"></div>
+      <div style="margin-top:10px;">
+        <div class="ph" style="margin-bottom:7px;">Mes ordres</div>
+        <table><thead><tr><th>Actif</th><th>Type</th><th>Prix</th><th>Statut</th></tr></thead>
+          <tbody id="orders-tbl">
+            <tr><td>ORANGE-CI</td><td><span class="bdg b-up">ACHAT</span></td><td style="font-family:var(--mono)">8 200</td><td><span class="bdg b-gd">PENDING</span></td></tr>
+            <tr><td>CORIS BANK</td><td><span class="bdg b-dn">VENTE</span></td><td style="font-family:var(--mono)">6 750</td><td><span class="bdg b-up">EXÉCUTÉ</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="pnl">
+    <div class="ph">Performance portefeuille simulé
+      <div class="chart-ctrl">
+        <button class="cc-btn on" onclick="setPortfPeriod('6M',this)">6M</button>
+        <button class="cc-btn" onclick="setPortfPeriod('1Y',this)">1A</button>
+        <button class="cc-btn" onclick="setPortfPeriod('3Y',this)">3A</button>
+      </div>
+    </div>
+    <div class="cw" style="height:160px;"><canvas id="portfChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════ CONFORMITÉ ═══════ -->
+<div id="comp-v" class="view">
+  <div style="margin-bottom:12px;"><div style="font-size:14px;font-weight:500;">Conformité réglementaire</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">BCEAO · OHADA · UEMOA · CEDEAO · Standards internationaux</div></div>
+  <div class="g2">
+    <div class="pnl">
+      <div class="ph">Checklist de conformité <span class="ph-sub">Cliquez pour détails</span></div>
+      <div id="comp-list"></div>
+    </div>
+    <div>
+      <div class="pnl" style="margin-bottom:10px;">
+        <div class="ph">Score global</div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="position:relative;width:90px;height:90px;flex-shrink:0;"><canvas id="compDonut"></canvas><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;font-family:var(--mono);color:var(--gold);" id="comp-score-lbl">72%</div></div>
+          <div>
+            <div style="font-size:13px;font-weight:500;margin-bottom:4px;">Niveau : <span style="color:var(--gold);">Intermédiaire</span></div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.6;">2 points critiques. Priorité : RGPD local + KYC BCEAO.</div>
+          </div>
+        </div>
+      </div>
+      <div class="pnl">
+        <div class="ph">Réglementations par marché</div>
+        <table>
+          <thead><tr><th>Marché</th><th>Régulateur</th><th>Complexité</th></tr></thead>
+          <tbody>
+            <tr><td>🇨🇮 Côte d'Ivoire</td><td>BCEAO + CEPICI</td><td><span class="bdg b-up">FAIBLE</span></td></tr>
+            <tr><td>🌍 UEMOA (8 pays)</td><td>BCEAO + CREPMF</td><td><span class="bdg b-or">MODÉRÉE</span></td></tr>
+            <tr><td>🇬🇭 Ghana</td><td>BoG + SEC Ghana</td><td><span class="bdg b-or">MODÉRÉE</span></td></tr>
+            <tr><td>🇳🇬 Nigeria</td><td>CBN + SEC Nigeria</td><td><span class="bdg b-dn">ÉLEVÉE</span></td></tr>
+            <tr><td>🌐 International</td><td>Multi-régulateurs</td><td><span class="bdg b-dn">TRÈS ÉLEVÉE</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ AGENTS ═══════ -->
+<div id="agents-v" class="view">
+  <div style="margin-bottom:12px;"><div style="font-size:14px;font-weight:500;">Architecture Agentique PROPHET</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">5 agents IA spécialisés — surveillance continue des 4 marchés</div></div>
+  <div class="g3" id="agents-grid" style="margin-bottom:10px;"></div>
+  <div class="pnl">
+    <div class="ph">Journal d'activité — Temps réel <span class="ph-sub" id="feed-count">0 événements</span></div>
+    <div id="agent-feed"></div>
+  </div>
+</div>
+
+<!-- ═══════ CHAT ═══════ -->
+<div id="chat-v">
+  <div id="qa-bar">
+    <button class="qa-btn" onclick="qk('Dans quel secteur investir avec 10M FCFA en Côte d\'Ivoire en 2025 ?')">💰 10M FCFA CI</button>
+    <button class="qa-btn" onclick="qk('Compare les risques et opportunités des 4 marchés : CI, AO, Afrique et Monde')">📊 Comparer 4 marchés</button>
+    <button class="qa-btn" onclick="qk('Quelle est la meilleure période pour investir dans la Fintech en Afrique de l\'Ouest ?')">⏱ Timing Fintech</button>
+    <button class="qa-btn" onclick="qk('Comment lancer une startup tech en Côte d\'Ivoire ? Licences, capital, BCEAO')">🚀 Startup CI</button>
+    <button class="qa-btn" onclick="qk('Explique-moi les risques d\'investir au Ghana vs Côte d\'Ivoire')">⚖️ CI vs Ghana</button>
+    <button class="qa-btn" onclick="qk('Comment accéder aux financements DFI (Proparco, IFC, AFD) en Afrique de l\'Ouest ?')">🏦 Financement DFI</button>
+    <button class="qa-btn" onclick="qk('Explique le stress test crise 2008 et son impact sur mon portefeuille AO')">🔥 Stress 2008</button>
+  </div>
+  <div id="messages">
+    <div class="msg">
+      <div class="msg-av av-b">P</div>
+      <div class="msg-bbl">
+        <p>Bonjour ! Je suis <strong>PROPHET</strong> — votre intelligence financière panafricaine.</p>
+        <p>Je surveille en continu <strong>4 marchés</strong> (🇨🇮 CI · 🌍 AO · 🌐 Afrique · 🗺️ Monde) avec 5 agents IA actifs. Que vous soyez startup, PME ou investisseur, je vous aide à décider <em>quoi</em>, <em>quand</em> et <em>où</em> investir.</p>
+        <div class="bubble-kpis">
+          <div class="bkpi"><div class="bkpi-l">BRVM-CI</div><div class="bkpi-v" style="color:var(--ci)">+8.4%</div></div>
+          <div class="bkpi"><div class="bkpi-l">PIB UEMOA</div><div class="bkpi-v" style="color:var(--ao)">+6.1%</div></div>
+          <div class="bkpi"><div class="bkpi-l">Tech AO</div><div class="bkpi-v up">$2.4B</div></div>
+          <div class="bkpi"><div class="bkpi-l">Taux BCEAO</div><div class="bkpi-v" style="color:var(--gold)">3.50%</div></div>
+        </div>
+        <button class="nav-lnk" onclick="go('dash',document.querySelector('.sb-item'))">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Voir le dashboard →
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="inp-wrap">
+    <textarea id="user-inp" placeholder="Posez votre question sur l'investissement en Afrique…" rows="1"></textarea>
+    <button id="send-btn" onclick="sendMsg()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13" stroke="#07090c" stroke-width="2" stroke-linecap="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#07090c" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+</div>
+
+</div><!-- main -->
+</div><!-- content -->
+</div><!-- shell -->
+
+<script>
+/* ═══════════════════════════════
+   NAVIGATION
+═══════════════════════════════ */
+const titles={dash:'Dashboard — Marchés en direct',stress:'Stress Test — Simulation de crises',pred:'Prédictif IA — Analyses & Prévisions',trade:'Trading & Outils de décision',comp:'Conformité réglementaire',agents:'Architecture Agentique',chat:'Assistant IA PROPHET'};
+function go(name,btn){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  const cv=document.getElementById('chat-v');cv.classList.remove('on');cv.style.display='none';
+  if(name==='chat'){cv.style.display='flex';cv.classList.add('on');}
+  else{const v=document.getElementById(name+'-v');if(v)v.classList.add('on');}
+  document.getElementById('page-ttl').textContent=titles[name]||'PROPHET';
+  if(name==='agents'){buildAgents();buildFeed();}
+  if(name==='comp'){buildComp();}
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
+
+/* ═══════════════════════════════
+   MODE PRO / PARTICULIER
+═══════════════════════════════ */
+let mode='pro';
+function toggleMode(){
+  mode=mode==='pro'?'part':'pro';
+  const mb=document.getElementById('mode-btn');
+  const sm=document.getElementById('sb-mode-txt');
+  const smb=document.querySelector('.sb-mode span');
+  if(mode==='pro'){mb.className='mode-btn';mb.textContent='PROFESSIONNEL';smb.textContent='PRO';sm.textContent='Professionnel';}
+  else{mb.className='mode-btn part';mb.textContent='PARTICULIER';smb.textContent='PART';sm.textContent='Particulier';}
+  document.getElementById('alloc-lbl').textContent=mode==='pro'?'Profil Pro':'Profil Particulier';
+  rebuildAlloc();
+}
+
+/* ═══════════════════════════════
+   TICKER
+═══════════════════════════════ */
+const tickerData=[
+  {cls:'t-ci',sym:'BRVM-CI',base:8.4},{cls:'t-ao',sym:'BRVM-AO',base:11.2},
+  {cls:'t-af',sym:'JSE-AF',base:5.3},{cls:'t-wl',sym:'S&P500',base:2.1},
+  {cls:'t-neu',sym:'FCFA/USD',base:0.16},{cls:'t-ci',sym:'PIB-CI',base:6.8},
+  {cls:'t-ao',sym:'UEMOA',base:6.1},{cls:'t-af',sym:'FDI-AF',base:11.0},
+];
+function buildTicker(){
+  const w=document.getElementById('ticker-wrap');
+  const inner=document.createElement('div');inner.className='ticker-inner';
+  [...tickerData,...tickerData].forEach(d=>{
+    const el=document.createElement('div');el.className=`tick ${d.cls}`;
+    el.innerHTML=`<div class="d"></div><span id="tick-${d.sym}">${d.sym} ${d.base>0?'+':''}${d.base.toFixed(1)}%</span>`;
+    inner.appendChild(el);
+  });
+  w.appendChild(inner);
+}
+buildTicker();
+function animateTicker(){
+  tickerData.forEach(d=>{
+    const v=(d.base+(Math.random()-.5)*.4);
+    document.querySelectorAll(`[id="tick-${d.sym}"]`).forEach(el=>{el.textContent=`${d.sym} ${v>0?'+':''}${v.toFixed(1)}%`;});
+    d.base=v;
+  });
+}
+setInterval(animateTicker,4000);
+
+/* ═══════════════════════════════
+   MARKET CARDS (live updating)
+═══════════════════════════════ */
+const mktData=[
+  {id:'ci',flag:'🇨🇮',name:'Marché Ivoirien',val:'BRVM-CI',num:8.4,sub:'Abidjan · FCFA · UEMOA',extra:'PIB +6.8%'},
+  {id:'ao',flag:'🌍',name:'Afrique de l\'Ouest',val:'BRVM',num:11.2,sub:'15 pays · FCFA+GHS+NGN',extra:'FDI +18%'},
+  {id:'af',flag:'🌐',name:'Afrique',val:'Composite',num:5.3,sub:'54 pays · Multi-devises',extra:'Tech $5.2B'},
+  {id:'wl',flag:'🗺️',name:'Marché Mondial',val:'S&P 500',num:2.1,sub:'NYSE · LSE · Euronext',extra:'VIX 18.2'},
+];
+function buildMktRow(){
+  const row=document.getElementById('mkt-row'); row.innerHTML='';
+  mktData.forEach((m,i)=>{
+    const c=document.createElement('div');
+    c.className=`mkt-c ${m.id}${i===0?' sel':''}`;
+    c.id=`mkt-${m.id}`;
+    c.onclick=()=>{document.querySelectorAll('.mkt-c').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');};
+    c.innerHTML=`<div class="mkt-flag">${m.flag}</div><div class="mkt-name">${m.name}</div><div class="mkt-val" style="color:var(--${m.id})">${m.val}</div><div class="mkt-delta up" id="mkt-delta-${m.id}">+${m.num.toFixed(1)}% YTD</div><div class="mkt-sub">${m.sub} · ${m.extra}</div>`;
+    row.appendChild(c);
+  });
+}
+buildMktRow();
+function animateMkt(){
+  mktData.forEach(m=>{
+    m.num=m.num+(Math.random()-.48)*.15;
+    const el=document.getElementById(`mkt-delta-${m.id}`);
+    if(el){el.textContent=`${m.num>0?'+':''}${m.num.toFixed(1)}% YTD`;el.className=`mkt-delta ${m.num>0?'up':'dn'}`;}
+  });
+}
+setInterval(animateMkt,5000);
+
+/* ═══════════════════════════════
+   LIVE ALERTS
+═══════════════════════════════ */
+const alertPool=[
+  {cls:'al-gr',t:'AGENT SCAN — Opportunité',d:'Volume ORANGE-CI +340% vs moy. 30j. Signal d\'accumulation institutionnelle.'},
+  {cls:'al-gd',t:'AGENT PRED — Signal achat',d:'Immo Diamniadio : +21% valorisation prévu T3 2025. Confiance 87%.'},
+  {cls:'al-re',t:'AGENT RISK — Alerte change',d:'Cedi GHS −2.3% sur 24h. Différer investissements Ghana.'},
+  {cls:'al-bl',t:'AGENT COMPLY — BCEAO',d:'Nouvelles règles sandbox fintech publiées. 3 nouvelles licences disponibles.'},
+  {cls:'al-gr',t:'AGENT OPP — Fintech CI',d:'Wave CI expansion Mali/BF confirmée. Écosystème partenaires en demande.'},
+];
+let alertIdx=0;
+function buildAlerts(){
+  const el=document.getElementById('live-alerts');el.innerHTML='';
+  for(let i=0;i<3;i++){const a=alertPool[(alertIdx+i)%alertPool.length];el.innerHTML+=`<div class="alert-box ${a.cls}"><div class="al-t">${a.t}</div><div class="al-d">${a.d}</div></div>`;}
+}
+buildAlerts();
+setInterval(()=>{alertIdx=(alertIdx+1)%alertPool.length;buildAlerts();},8000);
+
+/* ═══════════════════════════════
+   DASHBOARD CHARTS
+═══════════════════════════════ */
+const dashPeriods={
+  '1Y':{labels:['Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc','Jan','Fév','Mar'],ci:[6.2,6.4,6.1,6.5,6.7,6.4,6.8,6.9,6.7,6.8,7.0,7.1],ao:[5.8,5.9,5.7,6.0,6.1,5.9,6.2,6.3,6.1,6.2,6.3,6.4],af:[3.9,4.0,3.8,4.1,4.2,4.0,4.2,4.3,4.1,4.2,4.4,4.5],wl:[3.0,3.1,2.9,3.2,3.3,3.1,3.2,3.3,3.1,3.2,3.3,3.2]},
+  '3Y':{labels:['2022 T1','T2','T3','T4','2023 T1','T2','T3','T4','2024 T1','T2','T3','T4'],ci:[5.8,6.0,5.9,6.1,6.2,6.4,6.5,6.7,6.6,6.8,6.9,7.0],ao:[5.2,5.4,5.3,5.5,5.6,5.8,5.9,6.1,6.0,6.2,6.3,6.4],af:[3.6,3.7,3.6,3.8,3.8,3.9,4.0,4.1,4.1,4.2,4.3,4.4],wl:[5.5,4.0,3.5,3.8,3.2,3.3,3.1,3.2,3.0,3.1,3.2,3.2]},
+  '5Y':{labels:['2020','2021','2022','2023','2024','2025E'],ci:[2.0,6.0,6.4,6.9,6.8,7.1],ao:[1.8,4.9,5.5,5.9,6.1,6.4],af:[1.2,3.8,4.1,4.0,4.1,4.5],wl:[-3.5,6.0,3.5,3.1,3.2,3.3]},
+};
+let compareChart,flowChart,allocChart,signalChart;
+function buildDashCharts(period='1Y'){
+  const d=dashPeriods[period];
+  if(compareChart) compareChart.destroy();
+  compareChart=new Chart(document.getElementById('compareChart').getContext('2d'),{
+    type:'line',
+    data:{labels:d.labels,datasets:[
+      {label:'🇨🇮 CI',data:d.ci,borderColor:'#f5923c',backgroundColor:'rgba(245,146,60,.07)',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.4,fill:true},
+      {label:'🌍 AO',data:d.ao,borderColor:'#22d97a',backgroundColor:'rgba(34,217,122,.07)',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.4,fill:true},
+      {label:'🌐 AF',data:d.af,borderColor:'#3d8ef8',backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.4},
+      {label:'🗺️ Monde',data:d.wl,borderColor:'#c9963a',backgroundColor:'transparent',borderWidth:1.5,pointRadius:3,tension:.4,borderDash:[5,3]},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a8699',font:{size:11},boxWidth:12,padding:12}},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,titleColor:'#cdd6e8',bodyColor:'#7a8699',callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(1)}%`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11},callback:v=>v+'%'}}}}
+  });
+}
+function setDashPeriod(p,btn){document.querySelectorAll('#dash-ctrl .cc-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');buildDashCharts(p);}
+buildDashCharts();
+
+if(flowChart) flowChart.destroy();
+flowChart=new Chart(document.getElementById('flowChart').getContext('2d'),{
+  type:'bar',
+  data:{labels:['2021','2022','2023','2024'],datasets:[
+    {label:'CI ($Mds)',data:[2.1,2.8,3.4,4.2],backgroundColor:'rgba(245,146,60,.6)',borderColor:'#f5923c',borderWidth:1,borderRadius:4},
+    {label:'AO ($Mds)',data:[8.2,10.1,12.4,14.6],backgroundColor:'rgba(34,217,122,.5)',borderColor:'#22d97a',borderWidth:1,borderRadius:4},
+    {label:'AF ($Mds)',data:[39,46,52,58],backgroundColor:'rgba(61,142,248,.45)',borderColor:'#3d8ef8',borderWidth:1,borderRadius:4},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a8699',font:{size:11},boxWidth:12}},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,titleColor:'#cdd6e8',bodyColor:'#7a8699'}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11},callback:v=>'$'+v+'Mds'}}}}
+});
+
+function buildAllocChart(d){
+  if(allocChart) allocChart.destroy();
+  allocChart=new Chart(document.getElementById('allocChart').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:d.map(x=>x.l),datasets:[{data:d.map(x=>x.v),backgroundColor:d.map(x=>x.c),borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,callbacks:{label:c=>` ${c.label}: ${c.parsed}%`}}}}
+  });
+  const leg=document.getElementById('alloc-leg');leg.innerHTML='';
+  d.forEach(x=>{leg.innerHTML+=`<div style="display:flex;align-items:center;gap:5px;"><div style="width:7px;height:7px;border-radius:2px;background:${x.c};"></div><span style="font-size:10px;color:var(--t2);">${x.l} ${x.v}%</span></div>`;});
+}
+const allocPro=[{l:'Fintech B2B',v:35,c:'#1ec8b0'},{l:'Immobilier',v:30,c:'#f5923c'},{l:'SaaS',v:20,c:'#3d8ef8'},{l:'Obligations',v:15,c:'#c9963a'}];
+const allocPart=[{l:'Fintech mobile',v:40,c:'#1ec8b0'},{l:'Immo fractionné',v:25,c:'#f5923c'},{l:'BRVM actions',v:20,c:'#3d8ef8'},{l:'Trésorerie',v:15,c:'#8b6cf7'}];
+function rebuildAlloc(){buildAllocChart(mode==='pro'?allocPro:allocPart);}
+rebuildAlloc();
+
+if(signalChart) signalChart.destroy();
+signalChart=new Chart(document.getElementById('signalChart').getContext('2d'),{
+  type:'radar',
+  data:{labels:['Fintech','Immobilier','SaaS/Tech','Énergie sol.','E-commerce','BRVM','Logistique'],datasets:[
+    {label:'🇨🇮 CI',data:[9,8,8,6,7,7,6],borderColor:'#f5923c',backgroundColor:'rgba(245,146,60,.1)',pointBackgroundColor:'#f5923c',borderWidth:2,pointRadius:4},
+    {label:'🌍 AO',data:[8,7,7,8,8,8,7],borderColor:'#22d97a',backgroundColor:'rgba(34,217,122,.1)',pointBackgroundColor:'#22d97a',borderWidth:2,pointRadius:4},
+    {label:'🌐 AF',data:[7,6,6,9,7,7,8],borderColor:'#3d8ef8',backgroundColor:'rgba(61,142,248,.08)',pointBackgroundColor:'#3d8ef8',borderWidth:2,pointRadius:4},
+    {label:'🗺️ Monde',data:[5,5,9,6,7,6,6],borderColor:'#c9963a',backgroundColor:'rgba(201,150,58,.07)',pointBackgroundColor:'#c9963a',borderWidth:1.5,pointRadius:4,borderDash:[4,3]},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7a8699',font:{size:11},boxWidth:12,padding:12}},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1}},scales:{r:{grid:{color:'rgba(255,255,255,.07)'},angleLines:{color:'rgba(255,255,255,.07)'},pointLabels:{color:'#7a8699',font:{size:11}},ticks:{display:false,stepSize:2},suggestedMin:0,suggestedMax:10}}}
+});
+
+/* ═══════════════════════════════
+   STRESS TEST
+═══════════════════════════════ */
+const scenarios={
+  '2008':{name:'Crise financière 2008',bars:[{l:'Actions CI',p:-42,m:55},{l:'Fintech AO',p:-35,m:50},{l:'Immo Abidjan',p:-18,m:30},{l:'Obl. BCEAO',p:+8,m:20},{l:'Actions mondiales',p:-55,m:60},{l:'Or refuge',p:+12,m:20}],sum:{pnl:'-38.5%',var:'×3.2',sharpe:'-0.72',dur:'18 mois'},mkt:{ci:-32,ao:-28,af:-22,wl:-55},reco:['Augmenter obl. BCEAO à 30% (refuge)','Réduire EM à 10%. Stopper GHS.','Préparer liquidités pour rachats post-choc T+6']},
+  'covid':{name:'Choc Covid-2020',bars:[{l:'Actions CI',p:-28,m:50},{l:'Fintech AO',p:-15,m:40},{l:'Immo Abidjan',p:-12,m:30},{l:'Obl. BCEAO',p:+5,m:15},{l:'Actions mondiales',p:-34,m:50},{l:'Or refuge',p:+8,m:20}],sum:{pnl:'-22.4%',var:'×2.1',sharpe:'-0.45',dur:'3 mois'},mkt:{ci:-22,ao:-18,af:-15,wl:-34},reco:['Renforcer trésorerie FCFA (stable)','Positions e-santé et edtech (résilientes)','Rebond rapide : garder 20% pour reprise en V']},
+  'rates':{name:'Hausse brutale taux',bars:[{l:'Actions CI',p:-18,m:30},{l:'Fintech AO',p:-22,m:35},{l:'Immo Abidjan',p:-10,m:25},{l:'Obl. BCEAO',p:-24,m:35},{l:'Actions mondiales',p:-20,m:30},{l:'Or refuge',p:+5,m:15}],sum:{pnl:'-18.2%',var:'×1.8',sharpe:'-0.32',dur:'12 mois'},mkt:{ci:-15,ao:-18,af:-14,wl:-20},reco:['Réduire duration obligataire (sensibilité)','Renforcer actifs réels : immo + matières 1ères','Fintech : modèles fee-based résistent mieux']},
+  'devises':{name:'Crise devises AO',bars:[{l:'Actions CI',p:-12,m:30},{l:'Fintech AO',p:-28,m:40},{l:'Immo Abidjan',p:-8,m:20},{l:'Obl. BCEAO',p:+3,m:10},{l:'Actions mondiales',p:-5,m:15},{l:'Or refuge',p:+15,m:25}],sum:{pnl:'-24.7%',var:'×2.4',sharpe:'-0.51',dur:'8 mois'},mkt:{ci:-10,ao:-25,af:-20,wl:-5},reco:['Surpondérer FCFA (stable, ancré EUR)','Sortir GHS et NGN. Or ETF pour refuge.','CI + Sénégal : îlots de stabilité monétaire']},
+  'geo':{name:'Instabilité géopolitique',bars:[{l:'Actions CI',p:-22,m:40},{l:'Fintech AO',p:-30,m:45},{l:'Immo Abidjan',p:-15,m:30},{l:'Obl. BCEAO',p:+2,m:10},{l:'Actions mondiales',p:-3,m:15},{l:'Or refuge',p:+18,m:25}],sum:{pnl:'-21.8%',var:'×2.2',sharpe:'-0.48',dur:'6 mois'},mkt:{ci:-20,ao:-28,af:-15,wl:-3},reco:['Réduire Sahel. Conserver CI + SN + BJ.','Actifs non-souverains résistants (immo coté)','Surveiller corridors commerciaux Abidjan-Lagos']},
+  'inflation':{name:'Choc inflationniste',bars:[{l:'Actions CI',p:-14,m:25},{l:'Fintech AO',p:-10,m:25},{l:'Immo Abidjan',p:+6,m:20},{l:'Obl. BCEAO',p:-20,m:30},{l:'Actions mondiales',p:-15,m:25},{l:'Or refuge',p:+22,m:30}],sum:{pnl:'-15.4%',var:'×1.6',sharpe:'-0.28',dur:'24 mois'},mkt:{ci:-12,ao:-10,af:-8,wl:-15},reco:['Immo physique : protection naturelle inflation','Or + matières premières à 15% du portef.','Fintech paiement : revenus indépendants prix']},
+};
+let curSc='2008';let stressMktChart,stressVarChart;
+function buildScGrid(){
+  const g=document.getElementById('sc-grid');g.innerHTML='';
+  Object.entries(scenarios).forEach(([k,s])=>{
+    const c=document.createElement('div');c.className=`sc-card${k===curSc?' on':''}`;
+    c.innerHTML=`<div class="sc-nm">${s.name}</div><div class="sc-ds">${Object.keys(scenarios).indexOf(k)===0?'Effondrement bancaire, fuite actifs sûrs':Object.keys(scenarios).indexOf(k)===1?'Sell-off brutal, rebond en V':Object.keys(scenarios).indexOf(k)===2?'+300 bps BCEAO, spreads compressés':Object.keys(scenarios).indexOf(k)===3?'Dépréciation GHS/NGN, fuite capitaux':Object.keys(scenarios).indexOf(k)===4?'Propagation conflits sahéliens':'Inflation >8%, stagflation régionale'}</div><div class="sc-imp dn">${s.sum.pnl} estimé</div>`;
+    c.onclick=()=>{curSc=k;buildScGrid();renderStressBars();};
+    g.appendChild(c);
+  });
+}
+buildScGrid();
+function renderStressBars(){
+  const sc=scenarios[curSc];
+  document.getElementById('sc-lbl').textContent=sc.name;
+  const bc=document.getElementById('stress-bars');bc.innerHTML='';
+  sc.bars.forEach(b=>{
+    const isP=b.p>=0;const c=isP?'var(--gr)':'var(--re)';const bg=isP?'var(--grd)':'var(--red)';const w=Math.round(Math.abs(b.p)/b.m*100);
+    bc.innerHTML+=`<div class="sbar"><div class="sbar-l">${b.l}</div><div class="sbar-t"><div class="sbar-f" style="width:0;background:${bg};" data-w="${w}" data-c="${isP?'var(--gr)':'var(--re)'}"></div></div><div class="sbar-v" style="color:${c}">${b.p>0?'+':''}${b.p}%</div></div>`;
+  });
+  setTimeout(()=>{document.querySelectorAll('.sbar-f').forEach(f=>{f.style.width=f.dataset.w+'%';f.style.background=`color-mix(in srgb, ${f.dataset.c} 20%, transparent)`;f.style.boxShadow=`inset 0 0 0 1000px color-mix(in srgb, ${f.dataset.c} 70%, transparent)`;});},50);
+  const sg=document.getElementById('stress-sum');
+  sg.innerHTML=`<div class="ss-item"><div class="ss-l">Impact moyen</div><div class="ss-v dn">${sc.sum.pnl}</div></div><div class="ss-item"><div class="ss-l">VaR multiplié</div><div class="ss-v dn">${sc.sum.var}</div></div><div class="ss-item"><div class="ss-l">Sharpe dégradé</div><div class="ss-v dn">${sc.sum.sharpe}</div></div><div class="ss-item"><div class="ss-l">Durée estimée</div><div class="ss-v">${sc.sum.dur}</div></div>`;
+  const sr=document.getElementById('stress-reco');sr.innerHTML='';
+  const rcols=['var(--gr)','var(--gold)','var(--bl)'];
+  sc.reco.forEach((r,i)=>{sr.innerHTML+=`<div style="background:var(--bg3);border-radius:7px;padding:8px 11px;margin-bottom:7px;border-left:2px solid ${rcols[i]};"><div style="font-size:11px;color:${rcols[i]};font-weight:600;margin-bottom:2px;">${['Couverture prioritaire','Actifs défensifs','Opportunité de crise'][i]}</div><div style="font-size:11px;color:var(--t2)">${r}</div></div>`;});
+  const m=sc.mkt;
+  if(stressMktChart) stressMktChart.destroy();
+  stressMktChart=new Chart(document.getElementById('stressMktChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:['🇨🇮 CI','🌍 AO','🌐 AF','🗺️ Monde'],datasets:[{data:[m.ci,m.ao,m.af,m.wl],backgroundColor:[m.ci<0?'rgba(240,79,79,.35)':'rgba(34,217,122,.35)',m.ao<0?'rgba(240,79,79,.35)':'rgba(34,217,122,.35)',m.af<0?'rgba(240,79,79,.35)':'rgba(34,217,122,.35)',m.wl<0?'rgba(240,79,79,.35)':'rgba(34,217,122,.35)'],borderColor:[m.ci<0?'#f04f4f':'#22d97a',m.ao<0?'#f04f4f':'#22d97a',m.af<0?'#f04f4f':'#22d97a',m.wl<0?'#f04f4f':'#22d97a'],borderWidth:1.5,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,callbacks:{label:c=>`Impact: ${c.parsed.y}%`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11},callback:v=>v+'%'}}}}
+  });
+  if(stressVarChart) stressVarChart.destroy();
+  const varBase=[1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4,1.4];
+  const varStress=varBase.map(v=>parseFloat((v*Math.abs(sc.sum.var.replace('×',''))*(.8+Math.random()*.4)).toFixed(2)));
+  stressVarChart=new Chart(document.getElementById('stressVarChart').getContext('2d'),{
+    type:'line',
+    data:{labels:['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],datasets:[
+      {label:'VaR Baseline',data:varBase,borderColor:'#3d8ef8',backgroundColor:'rgba(61,142,248,.08)',borderWidth:2,pointRadius:3,tension:.4,fill:true},
+      {label:'VaR sous stress',data:varStress,borderColor:'#f04f4f',backgroundColor:'rgba(240,79,79,.08)',borderWidth:2,pointRadius:3,tension:.4,fill:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a8699',font:{size:11},boxWidth:12}},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11},callback:v=>v+'%'}}}}
+  });
+}
+renderStressBars();
+function runStress(){const btn=document.getElementById('run-btn');btn.disabled=true;btn.textContent='Simulation…';setTimeout(()=>{renderStressBars();btn.disabled=false;btn.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><polygon points="5,3 19,12 5,21" fill="white"/></svg>Lancer';},1000);}
+
+/* ═══════════════════════════════
+   PRÉDICTIF
+═══════════════════════════════ */
+const predData=[
+  {sec:'Fintech AO — Mobile Money',col:'var(--te)',cf:91,ds:'Croissance portée par Wave, Orange Money, MTN MoMo. Potentiel ROI 3–8x sur 36 mois. Fenêtre optimale : T2 2025.',tm:'INVESTIR MAINTENANT',tc:'b-up'},
+  {sec:'Immobilier Abidjan/Dakar',col:'var(--or)',cf:85,ds:'Déficit 2M logements. Diamniadio +21%. Rendement locatif 10–14%. Urbanisation +4.2%/an.',tm:'INVESTIR MAINTENANT',tc:'b-up'},
+  {sec:'SaaS B2B PME africaines',col:'var(--bl)',cf:78,ds:'Marché logiciels quasi-vierge. Adoption ERP en forte accélération. Modèle récurrent adapté.',tm:'MOMENT OPPORTUN',tc:'b-gd'},
+  {sec:'Énergie solaire off-grid',col:'var(--gr)',cf:72,ds:'40% pop. sans électricité. Pay-as-you-go : revenus stables + impact ESG fort pour bailleurs DFI.',tm:'T3 2025',tc:'b-or'},
+  {sec:'Crypto / DeFi régional',col:'var(--re)',cf:31,ds:'Cadre BCEAO hostile. Volatilité extrême. Max 2–3% du portefeuille recommandé.',tm:'ÉVITER / LIMITER',tc:'b-dn'},
+];
+function buildPredCards(){
+  const el=document.getElementById('pred-cards');el.innerHTML='';
+  predData.forEach(p=>{
+    el.innerHTML+=`<div class="pred-c" onclick="this.style.borderColor='${p.col}'">
+      <div class="pred-h"><span class="pred-sec" style="color:${p.col}">${p.sec}</span><span class="pred-cf ${p.cf>70?'up':p.cf>50?'':'dn'}">Conf. ${p.cf}%</span></div>
+      <div class="pred-bar"><div class="pred-bf" style="width:0;background:${p.col}" data-w="${p.cf}"></div></div>
+      <div class="pred-ds">${p.ds}</div>
+      <div class="pred-tm"><span class="bdg ${p.tc}">${p.tm}</span></div>
+    </div>`;
+  });
+  setTimeout(()=>document.querySelectorAll('.pred-bf').forEach(b=>{b.style.width=b.dataset.w+'%';}),100);
+}
+buildPredCards();
+
+let roiChart,macroChart;
+roiChart=new Chart(document.getElementById('roiChart').getContext('2d'),{
+  type:'bar',
+  data:{labels:['Fintech CI','Immo AO','SaaS PME','Énergie sol.','E-com.','BRVM obl.'],datasets:[
+    {label:'ROI min',data:[200,15,100,18,80,6],backgroundColor:'rgba(34,217,122,.2)',borderColor:'#22d97a',borderWidth:1,borderRadius:4},
+    {label:'ROI max',data:[800,22,500,25,300,10],backgroundColor:'rgba(201,150,58,.25)',borderColor:'#c9963a',borderWidth:1,borderRadius:4},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a8699',font:{size:10},boxWidth:10}},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}%`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:10},callback:v=>v+'%'}}}}
+});
+const macroDatasets={
+  pib:{ci:[7.1,7.4,7.8,8.1],ao:[6.4,6.7,7.0,7.3],af:[4.5,4.8,5.2,5.5],wl:[3.3,3.1,3.0,3.2],unit:'%',lbl:'PIB %'},
+  fdi:{ci:[4.2,5.1,6.2,7.4],ao:[14.6,17.2,20.1,23.8],af:[58,66,75,85],wl:[1700,1750,1820,1900],unit:'$Mds',lbl:'FDI $Mds'},
+  roi:{ci:[8.4,9.2,10.1,11.0],ao:[11.2,12.5,13.8,15.2],af:[5.3,6.1,7.0,7.8],wl:[2.1,2.4,2.7,3.0],unit:'%',lbl:'Rendement %'},
+};
+function buildMacroChart(type='pib'){
+  if(macroChart) macroChart.destroy();
+  const d=macroDatasets[type];
+  macroChart=new Chart(document.getElementById('macroChart').getContext('2d'),{
+    type:'line',
+    data:{labels:['2025','2026','2027','2028'],datasets:[
+      {label:`🇨🇮 CI`,data:d.ci,borderColor:'#f5923c',backgroundColor:'rgba(245,146,60,.1)',borderWidth:2,pointRadius:5,pointHoverRadius:7,tension:.3,fill:true},
+      {label:`🌍 AO`,data:d.ao,borderColor:'#22d97a',backgroundColor:'rgba(34,217,122,.08)',borderWidth:2,pointRadius:5,pointHoverRadius:7,tension:.3,fill:true},
+      {label:`🌐 AF`,data:d.af,borderColor:'#3d8ef8',backgroundColor:'transparent',borderWidth:2,pointRadius:5,tension:.3},
+      {label:`🗺️ Monde`,data:d.wl,borderColor:'#c9963a',backgroundColor:'transparent',borderWidth:1.5,pointRadius:5,tension:.3,borderDash:[4,3]},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#7a8699',font:{size:11},boxWidth:12}},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}${d.unit}`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11},callback:v=>v+d.unit}}}}
+  });
+}
+function setPredType(t,btn){document.querySelectorAll('#pred-v .cc-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');buildMacroChart(t);}
+buildMacroChart();
+
+/* ═══════════════════════════════
+   TRADING
+═══════════════════════════════ */
+let ttype='buy';
+const assetData={
+  SGBCI:{label:'SGBCI — Soc. Générale CI',prices:[12200,12350,12180,12480,12420,12650,12530,12780,12650,12700,12580,12740],o:'12 400',h:'12 800',l:'12 200',v:'48.2K'},
+  'ORANGE-CI':{label:'ORANGE-CI — Orange Telecom',prices:[8100,8200,8050,8300,8180,8420,8300,8500,8380,8450,8320,8600],o:'8 100',h:'8 620',l:'8 000',v:'31.5K'},
+  CORIS:{label:'CORIS BANK — Coris Bank Int.',prices:[6500,6620,6480,6700,6590,6750,6680,6820,6750,6800,6720,6900],o:'6 500',h:'6 920',l:'6 460',v:'22.1K'},
+  WAVE:{label:'WAVE CI — Wave Mobile Money',prices:[45000,46200,44800,47000,46100,48200,47000,49500,48200,49000,47800,50100],o:'45 000',h:'50 200',l:'44 600',v:'8.3K'},
+};
+let priceChart,portfChart;
+function setPriceAsset(sym,btn){
+  document.querySelectorAll('#trade-v .cc-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  const a=assetData[sym];
+  document.getElementById('chart-asset-lbl').textContent=a.label;
+  document.getElementById('p-open').textContent=a.o;document.getElementById('p-high').textContent=a.h;document.getElementById('p-low').textContent=a.l;document.getElementById('p-vol').textContent=a.v;
+  if(priceChart) priceChart.destroy();
+  priceChart=new Chart(document.getElementById('priceChart').getContext('2d'),{
+    type:'line',
+    data:{labels:['9h','10h','11h','12h','13h','14h','15h','16h','17h','18h','19h','Clôt.'],datasets:[{data:a.prices,borderColor:'#3d8ef8',backgroundColor:'rgba(61,142,248,.07)',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,callbacks:{label:c=>` ${c.parsed.y.toLocaleString('fr')} FCFA`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:10},callback:v=>v.toLocaleString('fr')}}}}
+  });
+}
+setPriceAsset('SGBCI',document.querySelector('#trade-v .cc-btn'));
+
+const portfPeriods={
+  '6M':{lbl:['Oct','Nov','Déc','Jan','Fév','Mar'],data:[3820,3900,3780,3950,4020,4180]},
+  '1Y':{lbl:['Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc','Jan','Fév','Mar'],data:[3500,3620,3480,3700,3780,3650,3820,3900,3780,3950,4020,4180]},
+  '3Y':{lbl:['2022','2023','2024','2025'],data:[2800,3200,3700,4180]},
+};
+function setPortfPeriod(p,btn){
+  document.querySelectorAll('#trade-v .pnl:last-child .cc-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(portfChart) portfChart.destroy();
+  const d=portfPeriods[p];
+  portfChart=new Chart(document.getElementById('portfChart').getContext('2d'),{
+    type:'line',
+    data:{labels:d.lbl,datasets:[{data:d.data,borderColor:'#22d97a',backgroundColor:'rgba(34,217,122,.07)',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2333',borderColor:'rgba(255,255,255,.1)',borderWidth:1,callbacks:{label:c=>`Portef.: $${(c.parsed.y/1000).toFixed(2)}B`}}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7a8699',font:{size:11},callback:v=>'$'+(v/1000).toFixed(1)+'B'}}}}
+  });
+}
+setPortfPeriod('6M',document.querySelector('#trade-v .pnl:last-child .cc-btn'));
+
+const asks=[[12820,900],[12800,1200],[12780,800],[12760,2100],[12750,500]];
+const bids=[[12700,1800],[12680,3200],[12650,900],[12620,1400],[12590,2200]];
+function buildOrderBook(){
+  const ob=document.getElementById('order-book');ob.innerHTML='';
+  asks.slice().reverse().forEach(r=>{ob.innerHTML+=`<div class="ob-row"><span style="color:var(--re);font-family:var(--mono)">${r[1].toLocaleString('fr')}</span><span style="font-family:var(--mono)">${r[0].toLocaleString('fr')}</span><span>—</span></div>`;});
+  ob.innerHTML+=`<div style="text-align:center;font-size:11px;padding:4px 0;color:var(--gold);font-weight:600;border-top:1px solid var(--b);border-bottom:1px solid var(--b);font-family:var(--mono)">12 750 FCFA ↕</div>`;
+  bids.forEach(r=>{ob.innerHTML+=`<div class="ob-row"><span>—</span><span style="font-family:var(--mono)">${r[0].toLocaleString('fr')}</span><span style="color:var(--gr);font-family:var(--mono)">${r[1].toLocaleString('fr')}</span></div>`;});
+}
+buildOrderBook();
+setInterval(()=>{asks.forEach(r=>{r[1]=Math.max(100,r[1]+Math.floor((Math.random()-.5)*200));});bids.forEach(r=>{r[1]=Math.max(100,r[1]+Math.floor((Math.random()-.5)*200));});buildOrderBook();},3000);
+
+function setTtype(t,btn){ttype=t;document.querySelectorAll('.ttype').forEach(b=>b.className='ttype');btn.className=`ttype on-${t}`;const tb=document.getElementById('t-btn');if(t==='buy'){tb.className='btn btn-green';tb.style.width='100%';tb.textContent='ACHETER →';}else if(t==='sell'){tb.className='btn btn-red';tb.style.width='100%';tb.textContent='VENDRE →';}else{tb.className='btn btn-gold';tb.style.width='100%';tb.textContent='CRÉER ALERTE →';}}
+function submitOrder(){
+  const a=document.getElementById('t-asset').value||'N/A';const q=document.getElementById('t-qty').value||'0';const p=parseInt(document.getElementById('t-price').value)||0;
+  const tc=document.getElementById('t-confirm');const types={buy:'Achat',sell:'Vente',alert:'Alerte'};
+  tc.style.display='block';tc.style.background=ttype==='buy'?'var(--grd)':ttype==='sell'?'var(--red)':'var(--gd)';tc.style.color=ttype==='buy'?'var(--gr)':ttype==='sell'?'var(--re)':'var(--gold)';tc.style.borderRadius='6px';tc.style.padding='7px 10px';
+  tc.textContent=`${types[ttype]} · ${q} × ${a} à ${p.toLocaleString('fr')} FCFA — En attente d'exécution`;
+  const tb=document.getElementById('orders-tbl');const row=document.createElement('tr');
+  row.innerHTML=`<td>${a}</td><td><span class="bdg ${ttype==='buy'?'b-up':ttype==='sell'?'b-dn':'b-gd'}">${types[ttype].toUpperCase()}</span></td><td style="font-family:var(--mono)">${p.toLocaleString('fr')}</td><td><span class="bdg b-or">PENDING</span></td>`;
+  tb.insertBefore(row,tb.firstChild);
+  setTimeout(()=>{tc.style.display='none';},4500);
+}
+
+/* ═══════════════════════════════
+   CONFORMITÉ
+═══════════════════════════════ */
+const compItems=[
+  {ico:'✓',icoBg:'var(--grd)',title:'Agrément BCEAO — Services financiers',desc:'Licence paiement électronique requise pour Fintech UEMOA. Délai : 3–6 mois. Capital min. 300M FCFA.',status:'b-up',stxt:'CONFORME'},
+  {ico:'!',icoBg:'var(--gd)',title:'Droit OHADA — Structuration juridique',desc:'SARL (min. 1M FCFA) pour startups. SA pour levées >100M. Immatriculation 48h au CEPICI CI.',status:'b-or',stxt:'À VÉRIFIER'},
+  {ico:'i',icoBg:'var(--bld)',title:'AML/KYC — Lutte anti-blanchiment',desc:'Obligations KYC renforcées UEMOA 2023. Fournisseurs : Smile Identity, Youverify.',status:'b-or',stxt:'EN COURS'},
+  {ico:'✓',icoBg:'var(--grd)',title:'Fiscalité — Code des investissements CI',desc:'Exonération IS 5–10 ans pour startups tech agréées. Zone franche disponible.',status:'b-up',stxt:'CONFORME'},
+  {ico:'✗',icoBg:'var(--red)',title:'Protection données — Loi n°2013-450 CI',desc:'DPO requis. Politique confidentialité obligatoire pour tout service digital traitant données utilisateurs.',status:'b-dn',stxt:'ACTION REQUISE'},
+];
+function buildComp(){
+  const el=document.getElementById('comp-list');if(el.children.length) return;
+  compItems.forEach(c=>{el.innerHTML+=`<div class="comp-i"><div class="comp-ico" style="background:${c.icoBg}">${c.ico}</div><div><div class="comp-ti">${c.title}</div><div class="comp-ds">${c.desc}</div></div><div style="flex-shrink:0;margin-left:auto;"><span class="bdg ${c.status}">${c.stxt}</span></div></div>`;});
+  new Chart(document.getElementById('compDonut').getContext('2d'),{type:'doughnut',data:{datasets:[{data:[72,28],backgroundColor:['#c9963a','rgba(255,255,255,.05)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+}
+
+/* ═══════════════════════════════
+   AGENTS
+═══════════════════════════════ */
+const agents=[
+  {id:'SCN',cls:'var(--bld)',tc:'var(--bl)',name:'Agent SCAN',sub:'Surveillance marché temps réel',desc:'Scrute BRVM, indices CI/AO/AF et mondiaux. Détecte volumes atypiques et signaux d\'entrée/sortie.',ts:'Actif — màj il y a 2 min',status:'b-up'},
+  {id:'RSK',cls:'var(--red)',tc:'var(--re)',name:'Agent RISK',sub:'Analyse et alertes de risque',desc:'Calcule VaR, CVaR, stress tests en temps réel. Alerte si risque global dépasse les seuils définis.',ts:'Alerte récente : Ghana GHS −2.3%',status:'b-up'},
+  {id:'OPP',cls:'var(--grd)',tc:'var(--gr)',name:'Agent OPP',sub:'Détection d\'opportunités',desc:'Identifie fenêtres d\'investissement optimales en croisant macro, saisonnalité et signaux sectoriels.',ts:'6 opportunités actives détectées',status:'b-up'},
+  {id:'CMP',cls:'var(--pud)',tc:'var(--pu)',name:'Agent COMPLY',sub:'Veille réglementaire',desc:'Monitore changements BCEAO, OHADA, CEDEAO. Génère alertes conformité adaptées au profil.',ts:'Màj : BCEAO sandbox nouvelles règles',status:'b-up'},
+  {id:'PRD',cls:'var(--gd)',tc:'var(--gold)',name:'Agent PRED',sub:'Prédictions IA & ML',desc:'Modèles ML entraînés sur 10 ans de données macro africaines. Prévisions ROI, timing, probabilités.',ts:'Modèle recalibré aujourd\'hui 06h00',status:'b-up'},
+];
+const feedLogs=[
+  {id:'SCN',cls:'var(--bld)',tc:'var(--bl)',msg:'<strong>SCAN</strong> — Volume ORANGE-CI +340% vs moy. 30j. Signal accumulation institutionnelle détecté.',ts:'Il y a 2 min'},
+  {id:'RSK',cls:'var(--red)',tc:'var(--re)',msg:'<strong>RISK</strong> — Cedi GHS −2.3% sur 24h. Recommandation : différer investissements Ghana jusqu\'à stabilisation.',ts:'Il y a 8 min'},
+  {id:'OPP',cls:'var(--grd)',tc:'var(--gr)',msg:'<strong>OPP</strong> — Wave CI confirme expansion Mali/BF. Opportunité sur l\'écosystème partenaires fintech.',ts:'Il y a 15 min'},
+  {id:'PRD',cls:'var(--gd)',tc:'var(--gold)',msg:'<strong>PRED</strong> — Immo Diamniadio (Dakar) révisé à +21% valorisation 24 mois. Confiance : 87%.',ts:'Il y a 32 min'},
+  {id:'CMP',cls:'var(--pud)',tc:'var(--pu)',msg:'<strong>COMPLY</strong> — BCEAO sandbox : 3 nouvelles licences fintech disponibles. Délai réduit à 4 mois.',ts:'Il y a 1h'},
+  {id:'SCN',cls:'var(--bld)',tc:'var(--bl)',msg:'<strong>SCAN</strong> — BRVM Composite +0.8% séance. Secteur bancaire mène la hausse (+1.4%).',ts:'Il y a 1h 20min'},
+  {id:'OPP',cls:'var(--grd)',tc:'var(--gr)',msg:'<strong>OPP</strong> — Appel d\'offres infrastructure BJ : $240M. Opportunité PME BTP avec capacité consortium.',ts:'Il y a 2h'},
+];
+function buildAgents(){
+  const g=document.getElementById('agents-grid');if(g.children.length) return;
+  agents.forEach(a=>{g.innerHTML+=`<div class="ag-c"><div class="ag-h"><div class="ag-av" style="background:${a.cls};color:${a.tc}">${a.id}</div><div><div class="ag-nm">${a.name}</div><div class="ag-sub">${a.sub}</div></div><span class="bdg ${a.status}" style="margin-left:auto">ACTIF</span></div><div class="ag-ds">${a.desc}</div><div class="ag-ts">${a.ts}</div></div>`;});
+}
+let feedBuilt=false;
+function buildFeed(){
+  if(feedBuilt) return;feedBuilt=true;
+  const feed=document.getElementById('agent-feed');
+  document.getElementById('feed-count').textContent=`${feedLogs.length} événements`;
+  feedLogs.forEach(f=>{feed.innerHTML+=`<div class="feed-i"><div class="feed-av" style="background:${f.cls};color:${f.tc}">${f.id}</div><div><div class="feed-msg">${f.msg}</div><div class="feed-ts">${f.ts}</div></div></div>`;});
+  setInterval(()=>{
+    const rnd=feedLogs[Math.floor(Math.random()*feedLogs.length)];
+    const d=document.createElement('div');d.className='feed-i feed-new';
+    d.innerHTML=`<div class="feed-av" style="background:${rnd.cls};color:${rnd.tc}">${rnd.id}</div><div><div class="feed-msg">${rnd.msg.replace('Il y a','→ Maintenant')}</div><div class="feed-ts">À l'instant</div></div>`;
+    feed.insertBefore(d,feed.firstChild);
+    if(feed.children.length>12) feed.removeChild(feed.lastChild);
+    const cnt=document.getElementById('feed-count');cnt.textContent=`${feed.children.length} événements`;
+  },6000);
+}
+
+/* ═══════════════════════════════
+   CHAT / CLAUDE AI
+═══════════════════════════════ */
+const SYSTEM=`Tu es PROPHET, plateforme d'intelligence financière panafricaine. Tu surveilles 4 marchés : 🇨🇮 Côte d'Ivoire, 🌍 Afrique de l'Ouest, 🌐 Afrique, 🗺️ Monde. Tes 5 agents IA (SCAN, RISK, OPP, COMPLY, PRED) alimentent tes analyses.
+
+EXPERTISE : Fintech & Mobile Money, Tech/SaaS, Immobilier, E-commerce, Énergie solaire, BRVM, obligations BCEAO.
+RISQUES : politique, change (FCFA/GHS/NGN/USD), réglementaire BCEAO/OHADA, liquidité marchés africains.
+FINANCEMENT : DFI (Proparco, IFC, AFD), VC africains (Partech, Adaverse, Kepple), fonds UEMOA.
+RÉGULATION : droit OHADA, agrément BCEAO, CEDEAO, fiscalité investisseurs CI, Ghana, Nigeria.
+
+STYLE : Pratique et actionnable. Montants en FCFA et $. Compare toujours CI vs AO vs AF vs Monde quand pertinent. Identifie risques ET opportunités. Pour startups : capital-efficient. Pour PME : cash-flow et diversification. Pour investisseurs : structuration et exit. Max 200 mots. Terminer par une recommandation concrète.`;
+const hist=[];
+const msgsEl=document.getElementById('messages');
+const inp=document.getElementById('user-inp');
+function addMsg(role,content){
+  const d=document.createElement('div');d.className='msg'+(role==='user'?' u':'');
+  const av=document.createElement('div');av.className='msg-av '+(role==='bot'?'av-b':'av-u');av.textContent=role==='bot'?'P':'V';
+  const b=document.createElement('div');b.className='msg-bbl';
+  content.split('\n').filter(p=>p.trim()).forEach(p=>{const el=document.createElement('p');el.innerHTML=p.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');b.appendChild(el);});
+  d.appendChild(av);d.appendChild(b);msgsEl.appendChild(d);msgsEl.scrollTop=msgsEl.scrollHeight;
+}
+function showTyping(){const d=document.createElement('div');d.className='msg';d.id='typ';d.innerHTML='<div class="msg-av av-b">P</div><div class="msg-bbl typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';msgsEl.appendChild(d);msgsEl.scrollTop=msgsEl.scrollHeight;}
+function rmTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+async function callClaude(msg){
+  hist.push({role:'user',content:`[Mode:${mode==='pro'?'Pro':'Particulier'}]\n${msg}`});showTyping();
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM,messages:hist})});
+    const data=await r.json();const reply=data.content.map(b=>b.text||'').join('');
+    hist.push({role:'assistant',content:reply});rmTyping();addMsg('bot',reply);
+  }catch(e){rmTyping();addMsg('bot','Erreur de connexion. Veuillez réessayer.');}
+}
+async function sendMsg(){const t=inp.value.trim();if(!t)return;inp.value='';inp.style.height='auto';addMsg('user',t);await callClaude(t);}
+function qk(t){go('chat',document.querySelectorAll('.sb-item')[6]);addMsg('user',t);callClaude(t);}
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,88)+'px';});
+</script>
+</body>
+</html>
